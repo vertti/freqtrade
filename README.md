@@ -46,8 +46,6 @@ if not feel free to raise a github issue.
 $ cd freqtrade/
 # copy example config. Dont forget to insert your api keys
 $ cp config.json.example config.json
-$ python -m venv .env
-$ source .env/bin/activate
-$ pip install -r requirements.txt
+$ source set_venv.sh
 $ ./main.py
 ```
