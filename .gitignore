@@ -80,3 +80,5 @@ preprocessor.py
 .env
 .venv
 .idea
+.pyenv
+*~
