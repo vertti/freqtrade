@@ -56,3 +56,18 @@ $ ./main.py
 docker build -t freqtrade .
 docker run --rm -it freqtrade
 ```
+
+
+##### Tests
+with nose
+```
+pip install nose
+nosetests
+nosetests tests.test_exchange ## run single testfile
+```
+
+with unittests
+```
+python -m unittests
+python -m unittests tests.test_exchange ## run single testfile
+```
