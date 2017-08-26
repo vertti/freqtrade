@@ -49,3 +49,10 @@ $ cp config.json.example config.json
 $ source set_venv.sh
 $ ./main.py
 ```
+
+
+##### Docker
+```
+docker build -t freqtrade .
+docker run --rm -it freqtrade
+```
