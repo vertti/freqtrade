@@ -1,6 +1,7 @@
 import enum
 import logging
 from bittrex.bittrex import Bittrex
+import bittrex
 from poloniex import Poloniex
 from wrapt import synchronized
 
@@ -8,6 +9,15 @@ logger = logging.getLogger(__name__)
 
 _exchange_api = None
 
+def debug_using_requests(request_url, apisign):
+    import requests
+
+    print('requesting url {}, with header {}'.format(request_url, apisign))
+
+    return requests.get(request_url,
+                        headers={"apisign": apisign}).json()
+
+bittrex.using_requests = debug_using_requests
 
 @synchronized
 def get_exchange_api(conf):
