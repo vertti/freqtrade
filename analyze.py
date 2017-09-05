@@ -117,6 +117,7 @@ def plot_dataframe(dataframe: DataFrame, pair: str) -> None:
     ax1.plot(dataframe.index.values, dataframe['dema_s'], label='DEMA(33)')
     # ax1.plot(dataframe.index.values, dataframe['sell'], 'ro', label='sell')
     ax1.plot(dataframe.index.values, dataframe['buy'], 'bo', label='buy')
+    ax1.plot(dataframe.index.values, dataframe['sar'], 'x', label='pSAR')
     ax1.legend()
 
     ax2.plot(dataframe.index.values, dataframe['macd'], label='MACD')
