@@ -43,8 +43,8 @@ def get_ticker_dataframe(pair: str) -> DataFrame:
     } for t in sorted(data['result'], key=lambda k: k['T']) if arrow.get(t['T']) > minimum_date]
     dataframe = DataFrame(json_normalize(data))
 
-    dataframe['close_30_ema'] = ta.EMA(dataframe, timeperiod=30)
-    dataframe['close_90_ema'] = ta.EMA(dataframe, timeperiod=90)
+    dataframe['dema_f'] = ta.DEMA(dataframe, timeperiod=18)
+    dataframe['dema_s'] = ta.DEMA(dataframe, timeperiod=33)
 
     dataframe['sar'] = ta.SAR(dataframe, 0.01, 0.1)
 
@@ -113,8 +113,8 @@ def plot_dataframe(dataframe: DataFrame, pair: str) -> None:
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     fig.suptitle(pair, fontsize=14, fontweight='bold')
     ax1.plot(dataframe.index.values, dataframe['close'], label='close')
-    ax1.plot(dataframe.index.values, dataframe['close_30_ema'], label='EMA(30)')
-    ax1.plot(dataframe.index.values, dataframe['close_90_ema'], label='EMA(90)')
+    ax1.plot(dataframe.index.values, dataframe['dema_f'], label='DEMA(18)')
+    ax1.plot(dataframe.index.values, dataframe['dema_s'], label='DEMA(33)')
     # ax1.plot(dataframe.index.values, dataframe['sell'], 'ro', label='sell')
     ax1.plot(dataframe.index.values, dataframe['buy'], 'bo', label='buy')
     ax1.legend()
