@@ -66,13 +66,25 @@ def populate_trends(dataframe: DataFrame) -> DataFrame:
     :param dataframe: DataFrame
     :return: DataFrame with populated trends
     """
+
+    prev_macd = dataframe['macd'].shift(1)
+    prev_macds = dataframe['macds'].shift(1)
+
     dataframe.loc[
-        (dataframe['stochrsi'] < 20)
-        & (dataframe['macd'] > dataframe['macds']) 
-        & (dataframe['close'] > dataframe['sar']),
+        (dataframe['macd'] > dataframe['macds']) &
+        (prev_macd <= prev_macds),
+        'crossover'
+    ] = 1    
+
+    dataframe.loc[
+        (dataframe['close'] > dataframe['sar']),
         'underpriced'
     ] = 1
-    dataframe.loc[dataframe['underpriced'] == 1, 'buy'] = dataframe['close']
+
+    dataframe.loc[
+        (dataframe['underpriced'] == 1) &
+        (dataframe['crossover'] == 1),
+        'buy'] = dataframe['close']
     return dataframe
 
 
