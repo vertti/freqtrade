@@ -48,9 +48,7 @@ def get_ticker_dataframe(pair: str) -> DataFrame:
 
     dataframe['sar'] = ta.SAR(dataframe, 0.01, 0.1)
 
-    # calculate StochRSI
-    stochrsi = ta.STOCHRSI(dataframe)
-    dataframe['stochrsi'] = stochrsi['fastd'] # values between 0-100, not 0-1
+    dataframe['adx'] = ta.ADX(dataframe)
 
     macd = ta.MACD(dataframe)
     dataframe['macd'] = macd['macd']
@@ -83,7 +81,8 @@ def populate_trends(dataframe: DataFrame) -> DataFrame:
 
     dataframe.loc[
         (dataframe['underpriced'] == 1) &
-        (dataframe['crossover'] == 1),
+        (dataframe['crossover'] == 1) &
+        (dataframe['adx'] > 25),
         'buy'] = dataframe['close']
     return dataframe
 
@@ -138,9 +137,8 @@ def plot_dataframe(dataframe: DataFrame, pair: str) -> None:
     ax2.plot(dataframe.index.values, [0] * len(dataframe.index.values))
     ax2.legend()
 
-    ax3.plot(dataframe.index.values, dataframe['stochrsi'], label='StochRSI')
-    ax3.plot(dataframe.index.values, [80] * len(dataframe.index.values))
-    ax3.plot(dataframe.index.values, [20] * len(dataframe.index.values))
+    ax3.plot(dataframe.index.values, dataframe['adx'], label='ADX')
+    ax3.plot(dataframe.index.values, [25] * len(dataframe.index.values))
     ax3.legend()
 
     # Fine-tune figure; make subplots close to each other and hide x ticks for
