@@ -46,7 +46,7 @@ def get_ticker_dataframe(pair: str) -> DataFrame:
     dataframe['close_30_ema'] = ta.EMA(dataframe, timeperiod=30)
     dataframe['close_90_ema'] = ta.EMA(dataframe, timeperiod=90)
 
-    dataframe['sar'] = ta.SAR(dataframe, 0.02, 0.2)
+    dataframe['sar'] = ta.SAR(dataframe, 0.01, 0.1)
 
     # calculate StochRSI
     stochrsi = ta.STOCHRSI(dataframe)
