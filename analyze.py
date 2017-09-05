@@ -66,13 +66,6 @@ def populate_trends(dataframe: DataFrame) -> DataFrame:
     :param dataframe: DataFrame
     :return: DataFrame with populated trends
     """
-    """
-    dataframe.loc[
-        (dataframe['stochrsi'] < 20)
-        & (dataframe['close_30_ema'] > (1 + 0.0025) * dataframe['close_60_ema']),
-        'underpriced'
-    ] = 1
-    """
     dataframe.loc[
         (dataframe['stochrsi'] < 20)
         & (dataframe['macd'] > dataframe['macds']) 
