@@ -43,8 +43,7 @@ def get_ticker_dataframe(pair: str) -> DataFrame:
     } for t in sorted(data['result'], key=lambda k: k['T']) if arrow.get(t['T']) > minimum_date]
     dataframe = DataFrame(json_normalize(data))
 
-    dataframe['dema_f'] = ta.DEMA(dataframe, timeperiod=18)
-    dataframe['dema_s'] = ta.DEMA(dataframe, timeperiod=33)
+    dataframe['ema'] = ta.EMA(dataframe, timeperiod=33)
 
     dataframe['sar'] = ta.SAR(dataframe, 0.01, 0.1)
 
@@ -65,25 +64,27 @@ def populate_trends(dataframe: DataFrame) -> DataFrame:
     :return: DataFrame with populated trends
     """
 
-    prev_macd = dataframe['macd'].shift(1)
-    prev_macds = dataframe['macds'].shift(1)
+    prev_sar = dataframe['sar'].shift(1)
+    prev_close = dataframe['close'].shift(1)
+    prev_sar2 = dataframe['sar'].shift(2)
+    prev_close2 = dataframe['close'].shift(2)
+
+    dataframe.loc[dataframe['ema'] <= dataframe['close'], 'upswing'] = 1
 
     dataframe.loc[
-        (dataframe['macd'] > dataframe['macds']) &
-        (prev_macd <= prev_macds),
-        'crossover'
+        (dataframe['close'] > dataframe['sar']) &
+        (prev_close > prev_sar) &
+        (prev_close2 < prev_sar2),
+        'swap'
     ] = 1    
 
     dataframe.loc[
-        (dataframe['close'] > dataframe['sar']),
-        'underpriced'
-    ] = 1
+        (dataframe['upswing'] == 1) &
+        (dataframe['swap'] == 1) &
+        (dataframe['adx'] > 20),
+        'buy'] = 1
+    dataframe.loc[dataframe['buy'] == 1, 'buyprice'] = dataframe['close']
 
-    dataframe.loc[
-        (dataframe['underpriced'] == 1) &
-        (dataframe['crossover'] == 1) &
-        (dataframe['adx'] > 25),
-        'buy'] = dataframe['close']
     return dataframe
 
 
@@ -102,7 +103,7 @@ def get_buy_signal(pair: str) -> bool:
     if signal_date < arrow.now() - timedelta(minutes=10):
         return False
 
-    signal = latest['underpriced'] == 1
+    signal = latest['buy'] == 1
     logger.debug('buy_trigger: %s (pair=%s, signal=%s)', latest['date'], pair, signal)
     return signal
 
@@ -121,25 +122,18 @@ def plot_dataframe(dataframe: DataFrame, pair: str) -> None:
     import matplotlib.pyplot as plt
 
     # Three subplots sharing x axe
-    fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
     fig.suptitle(pair, fontsize=14, fontweight='bold')
+    ax1.plot(dataframe.index.values, dataframe['sar'], 'g_', label='pSAR')
     ax1.plot(dataframe.index.values, dataframe['close'], label='close')
-    ax1.plot(dataframe.index.values, dataframe['dema_f'], label='DEMA(18)')
-    ax1.plot(dataframe.index.values, dataframe['dema_s'], label='DEMA(33)')
     # ax1.plot(dataframe.index.values, dataframe['sell'], 'ro', label='sell')
+    ax1.plot(dataframe.index.values, dataframe['ema'], '--', label='EMA(20)')
     ax1.plot(dataframe.index.values, dataframe['buy'], 'bo', label='buy')
-    ax1.plot(dataframe.index.values, dataframe['sar'], 'x', label='pSAR')
     ax1.legend()
 
-    ax2.plot(dataframe.index.values, dataframe['macd'], label='MACD')
-    ax2.plot(dataframe.index.values, dataframe['macds'], label='MACDS')
-    ax2.plot(dataframe.index.values, dataframe['macdh'], label='MACD Histogram')
-    ax2.plot(dataframe.index.values, [0] * len(dataframe.index.values))
+    ax2.plot(dataframe.index.values, dataframe['adx'], label='ADX')
+    ax2.plot(dataframe.index.values, [25] * len(dataframe.index.values))
     ax2.legend()
-
-    ax3.plot(dataframe.index.values, dataframe['adx'], label='ADX')
-    ax3.plot(dataframe.index.values, [25] * len(dataframe.index.values))
-    ax3.legend()
 
     # Fine-tune figure; make subplots close to each other and hide x ticks for
     # all but bottom plot.
