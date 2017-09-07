@@ -26,7 +26,7 @@ def get_ticker_dataframe(pair: str) -> DataFrame:
     }
     params = {
         'marketName': pair.replace('_', '-'),
-        'tickInterval': 'OneMin',
+        'tickInterval': 'fiveMin',
         '_': minimum_date.timestamp * 1000
     }
     data = requests.get(url, params=params, headers=headers).json()
@@ -45,7 +45,7 @@ def get_ticker_dataframe(pair: str) -> DataFrame:
 
     dataframe['ema'] = ta.EMA(dataframe, timeperiod=33)
 
-    dataframe['sar'] = ta.SAR(dataframe, 0.01, 0.1)
+    dataframe['sar'] = ta.SAR(dataframe, 0.02, 0.22)
 
     dataframe['adx'] = ta.ADX(dataframe)
 
